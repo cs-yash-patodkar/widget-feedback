@@ -1,0 +1,140 @@
+<!-- Copyright start
+  Copyright (C) 2008 - 2023 Fortinet Inc.
+  All rights reserved.
+  FORTINET CONFIDENTIAL & FORTINET PROPRIETARY SOURCE CODE
+  Copyright end -->
+
+<div class="widget widget-container chart" style="background-color:#1A202A">
+  <form data-ng-submit="submit()" name="submitFormWidget"  data-ng-class="{'state-wait': processing }" >
+    <div data-ng-if="!nextPage && !playbookError" >
+      <div id="report-header" class="display-inline-flex margin-0 width-100pt padding-md"
+      style="background-size: cover; background-color: #232C3C;">
+      <div class="font-size-14" style=" margin: 5px;">
+        <img src="widgets/installed/feedback-1.0.0/images/Chat.svg"
+          style="height: 18px; margin-right: 3px; margin-bottom: 2px" alt="Bot">
+          Feedback
+      </div>
+    </div>
+    <div id="report-body" class="padding-md">
+      <span class="font-size-14">
+        Hi,
+        Welcome to FortiSOAR
+      </span>
+      <hr class="margin-top-md margin-bottom-md">
+      <div>
+        <label class="font-size-12" style="color:#D2D5DA" for="report-user-name">Name <span
+            class="text-danger">*</span></label>
+        <div data-ng-class="{ 'has-error': submitFormWidget.fullName.$invalid && submitFormWidget.fullName.$touched }" class="display-flex">
+          <input class="form-control" type="text" ng-model="user.fullName" name="fullName" required>
+        </div>
+      </div>
+      <div>
+        <label class="font-size-12" style="color:#D2D5DA" for="report-user-name">Email-ID <span
+            class="text-danger">*</span></label>
+        <div data-ng-class="{ 'has-error': submitFormWidget.emails.$invalid && submitFormWidget.emails.$touched }" class="display-flex">
+          <input class="form-control" type="email" id="emails"  ng-model="user.emailId"  name="emails" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\s*,\s*[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*" required multiple>
+        </div>
+      </div>
+      <!-- Radio Button -->
+      <div id="radio-button" class="display-flex-space-between width-220px margin-top-lg">
+        <span class="font-size-12">
+          Send via
+        </span>
+        <div class="margin-bottom-sm">
+          <div class="display-flex-space-between font-size-12 width-145px" style="color: #D2D5DA;">
+            <div>
+              <label><input data-ng-disabled="!connectorHealthStatus['smtp']" data-ng-change="onChangeMode()" class="position-relative height-12" style="top: 1px" id="SMTP" name="SMTP"
+                  type="radio" data-ng-model="sendVia" value="SMTP">&nbsp;&nbsp;SMTP</label>
+            </div>
+
+            <div>
+              <label><input data-ng-disabled="!connectorHealthStatus['exchange']" data-ng-change="onChangeMode()" class="position-relative height-12" style="top: 1px" id="Exchange" name="Exchange"
+                  type="radio" data-ng-model="sendVia" value="Exchange">&nbsp;&nbsp;Exchange</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Radio Button End -->
+      <span style="color: #c43737; font-size: 12px;" data-ng-show="!connectorHealthStatus['exchange'] || !connectorHealthStatus['smtp']">
+        Please configure the respective connectors to enable Send Via option.
+      </span>
+
+      <div id="selectCategory">
+        <label id="field-for-data-source" class="control-label font-size-12">Category
+        </label>
+        <select class="form-control" data-ng-options="content.type as content.name for content in category"
+          data-ng-model="selectedCategory.selectedCategory" data-ng-change="categoryChanged()" required>
+          <option value="">Select an Option</option>
+        </select>
+      </div>
+      <div data-ng-if="!contentLoaded">
+        <cs-spinner></cs-spinner>
+      </div>
+      <div data-ng-if="selectedCategory.selectedCategory && (connectorHealthStatus['exchange'] || connectorHealthStatus['smtp']) && contentLoaded">
+        <div class="margin-top-md"
+          data-ng-if="selectedCategory.selectedCategory === 'solutionpack' || selectedCategory.selectedCategory === 'connector' || selectedCategory.selectedCategory === 'widget'">
+          <div id="installedSPorC">
+            <label id="field-for-data-source" class="control-label">Select installed content
+              <span class="text-danger">*</span>
+              <span
+                data-uib-tooltip="Select the Field which has the data, only json type fields will be available in the dropdown"
+                data-tooltip-append-to-body="true"><i class="icon icon-information font-Size-13"></i></span>
+            </label>
+            <select class="form-control"
+              data-ng-options="content as content.label for content in installedContents"
+              data-ng-model="installedContent.solution" required>
+              <option value="">Select an Option</option>
+            </select>
+          </div>
+        </div>
+        <div data-ng-class="{ 'has-error': submitFormWidget.subject.$invalid && submitFormWidget.subject.$touched }" class="margin-top-md">
+          <label class="font-size-12" style="color:#D2D5DA" for="subject">Subject  <span class="text-danger">*</span>
+          </label>
+          <input class="form-control" type="text" data-ng-model="email.subject"  required>
+        </div>
+        <div data-ng-class="{ 'has-error': submitFormWidget.description.$invalid && submitFormWidget.description.$touched }" class="margin-top-md">
+          <label class="font-size-12" style="color:#D2D5DA" for="Description">Description <span class="text-danger">*</span>
+          </label>
+          <textarea id="textInput"  class="form-control" style="height: 100px;" onchange="checkWordCount()" data-ng-model="email.description" required>
+          </textarea>
+          <p id="wordCountMessage"></p>
+        </div>
+
+        <div id="upload-a-screenshot" class="margin-top-md" data-ng-show="!loadingJob">
+          <span class="font-size-12 margin-top-md" style="color:#D2D5DA">
+            
+          </span>
+          <div class="file-upload margin-top-6"
+            data-ng-model="uploadedFile" ngf-select="uploadFiles(uploadedFile)" data-ngf-drop="uploadFiles(uploadedFile)" data-ng-show="!uploadedFileFlag" data-accept="*/*"
+            data-ngf-pattern="*/*">
+            <h2 class="margin-top-sm margin-bottom-0">
+              <span class="padding-right-sm fa fa-folder-open"></span>
+            </h2>
+            <h5 class="margin-top-sm" style="background-color: unset; text-align: center;">Drop a Screenshot or Logs</h5>
+            <p>or click to use standard uploader</p>
+            <p>(File Size should not exceed 25MB)</p>
+          </div>
+          <button type="button" data-ng-show="uploadedFileFlag"
+            class="icon icon-edit btn btn-link margin-top-sm center-block" data-ng-click="uploadedFileFlag = null; "
+            id="change-profile-image">Change Image</button>
+        </div>
+        <div data-ng-if="loadingJob">
+          <cs-spinner></cs-spinner>
+        </div>
+      </div>
+    </div>
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-sm margin-bottom-sm margin-left-md width-100px"
+        data-ng-disabled="!selectedCategory.selectedCategory || !contentLoaded || !playbookTriggered">
+        Submit
+      </button>
+    </div>
+    <div data-ng-if="!playbookTriggered">
+      <cs-spinner></cs-spinner>
+    </div>
+    </div>
+  </form>
+  <div id="Thank You Image" class="position-absolute top-200px" style="left:150px"   data-ng-if="nextPage"">
+    <img src="widgets/installed/feedback-1.0.0/images/Thankyou.svg" alt="Bot">
+  </div>
+</div>
